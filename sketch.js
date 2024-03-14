@@ -3,14 +3,77 @@ let vid, vid0, vid1, vid2;
 let x, y, r;
 let numKeys, attack;
 let start = true;
+let selected;
+let i = -1;
+let button, midiSelect;
 
 function setup() {
+  button = createButton("start");
+  button.position(300, 100);
+  midiSelect = createSelect();
+  midiSelect.position(100, 100);
+  selected = midiSelect.selected();
+
+  button.mousePressed(() => {
+    selected = midiSelect.selected();
+    myOutput = WebMidi.outputs[selected];
+    console.log("midi port = " + myOutput.name);
+    midiSelect.hide();
+    button.hide();
+    clear();
+    vid3.play();
+    let note = map(mouseY, 0, height, 1, 108);
+    myOutput.playNote(note, 1, { duration: 1000, rawAttack: 100 });
+
+    if (start) {
+      myOutput.playNote(4, 1, { duration: 9800, rawAttack: 100 });
+      myOutput.playNote(2, 1, { duration: 6730, rawAttack: 100 });
+      myOutput.playNote(0, 1, { duration: 6700, rawAttack: 100 });
+      start = false;
+    }
+  });
+
   createCanvas(windowWidth, windowHeight);
   numKeys = 108 / 4;
   attack = height / 8;
   vid3 = createVideo("assets/slacker04r.webm");
   vid3.speed(0.5);
   vid3.hide();
+
+  addCues();
+
+  WebMidi.enable()
+    .then(onEnabled)
+    .catch((err) => alert(err));
+
+  x = width / numKeys;
+  y = height / attack;
+  noStroke();
+}
+
+function onEnabled() {
+  console.log("WebMIDI Enabled");
+  // Inputs/Outputs
+  WebMidi.inputs.forEach((input) =>
+    console.log("Input: ", input.manufacturer, input.name)
+  );
+  WebMidi.outputs.forEach((output) => midiSelect.option(output.name, i), i++);
+  selected = midiSelect.selected();
+  myOutput = WebMidi.outputs[selected];
+  console.log("midi port = " + myOutput.name);
+}
+
+function draw() {
+  if (start) {
+    background(0);
+  } else {
+    fill(255, 13);
+    rect(0, 0, width, height / 5 + random(-3, 3));
+    image(vid3, 0, 0, width, height);
+  }
+}
+
+function addCues() {
   //first step
   vid3.addCue(1, step0, 0);
   vid3.addCue(1.5, step01, 0);
@@ -57,46 +120,6 @@ function setup() {
   vid3.addCue(54.5, step12, 89);
   //twelth
   vid3.addCue(55.25, laststep0, 0);
-
-  WebMidi.enable()
-    .then(onEnabled)
-    .catch((err) => alert(err));
-
-  x = width / numKeys;
-  y = height / attack;
-  noStroke();
-}
-
-function onEnabled() {
-  console.log("WebMIDI Enabled");
-  // Inputs/Outputs
-  WebMidi.inputs.forEach((input) =>
-    console.log("Input: ", input.manufacturer, input.name)
-  );
-  WebMidi.outputs.forEach((output) =>
-    console.log("Output: ", output.manufacturer, output.name)
-  );
-  console.log(WebMidi.outputs[0]);
-  myOutput = WebMidi.outputs[0];
-}
-
-function draw() {
-  fill(255, 13);
-  rect(0, 0, width, height / 5 + random(-3, 3));
-  image(vid3, 0, 0, width, height);
-}
-
-function mousePressed() {
-  vid3.play();
-  let note = map(mouseY, 0, height, 1, 108);
-  myOutput.playNote(note, 1, { duration: 1000, rawAttack: 100 });
-
-  if (start) {
-    myOutput.playNote(4, 1, { duration: 9800, rawAttack: 100 });
-    myOutput.playNote(2, 1, { duration: 6730, rawAttack: 100 });
-    myOutput.playNote(0, 1, { duration: 6700, rawAttack: 100 });
-    start = false;
-  }
 }
 
 // first step
