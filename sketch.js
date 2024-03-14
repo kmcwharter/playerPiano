@@ -1,13 +1,15 @@
 let myOutput;
 let vid, vid0, vid1, vid2;
 let x, y, r;
-let numKeys, attack;
 let start = true;
 let selected;
 let i = -1;
 let button, midiSelect;
 
 function setup() {
+  vid3 = createVideo("assets/slacker04r.webm");
+  vid3.speed(0.5);
+  vid3.hide();
   button = createButton("start");
   button.position(300, 100);
   midiSelect = createSelect();
@@ -34,20 +36,12 @@ function setup() {
   });
 
   createCanvas(windowWidth, windowHeight);
-  numKeys = 108 / 4;
-  attack = height / 8;
-  vid3 = createVideo("assets/slacker04r.webm");
-  vid3.speed(0.5);
-  vid3.hide();
-
   addCues();
 
   WebMidi.enable()
     .then(onEnabled)
     .catch((err) => alert(err));
 
-  x = width / numKeys;
-  y = height / attack;
   noStroke();
 }
 
